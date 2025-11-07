@@ -1,11 +1,15 @@
 import 'dotenv/config';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import OpenAI from 'openai';
 
-// Schema import kept for future validation needs but unused in streaming mode.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { briefSchema } from './schema/brief.js';
 import { parseCliArgs } from './cliArgs.js';
 import { buildSystemPrompt, buildUserPrompt } from './prompts.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const OUTPUT_DIR = path.resolve(__dirname, '../output');
 
 async function main() {
   const cliArgs = parseCliArgs();
@@ -21,32 +25,41 @@ async function main() {
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const targetModel = 'gpt-4o-mini';
 
-  const stream = await client.chat.completions.create({
+  const responsePayload = {
     model: targetModel,
-    stream: true,
-    messages: [
+    temperature: 0.3,
+    input: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ],
-    temperature: 0.3,
-  });
+  } as any;
 
-  console.log('--- streaming start ---\n');
+  const response = await client.responses.create(responsePayload);
 
-  let hadContent = false;
-  for await (const chunk of stream) {
-    const content = chunk.choices?.[0]?.delta?.content;
-    if (content) {
-      hadContent = true;
-      process.stdout.write(content);
-    }
+  const rawJson = response.output_text;
+
+  if (!rawJson) {
+    console.error('No content received from OpenAI response.');
+    process.exit(1);
   }
 
-  if (!hadContent) {
-    console.error('\n(No streamed content received)');
+  let parsed;
+  try {
+    parsed = JSON.parse(rawJson);
+  } catch (err) {
+    console.error('Failed to parse JSON response:', err);
+    process.exit(1);
   }
 
-  console.log('\n\n--- streaming end ---');
+  await fs.mkdir(OUTPUT_DIR, { recursive: true });
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `briefs-${timestamp}.json`;
+  const filePath = path.join(OUTPUT_DIR, filename);
+
+  await fs.writeFile(filePath, JSON.stringify(parsed, null, 2), 'utf8');
+
+  console.log(`Briefs saved to ${filePath}`);
 }
 
 main().catch((err) => {
