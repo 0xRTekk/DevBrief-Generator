@@ -4,15 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --import ./register-ts-node.mjs src/chat.ts",
+    "dev": "node --import ./register-ts-node.mjs src/chat.ts --level=junior --domain=EdTech --tech_focus=backend --stack=Node,TypeScript,Supabase --duration=\"2 weeks\" --count=3",
     "validate": "node --import ./register-ts-node.mjs src/validateDataset.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/chat.js"
+    "start": "node dist/chat.js --level=junior --domain=FinTech --tech_focus=frontend --stack=React,TypeScript,TailwindCSS --duration=\"2 weeks\" --count=3"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
-    "openai": "^4.58.1",
-    "zod": "^4.1.12"
+    "openai": "^4.58.1"
   },
   "devDependencies": {
     "@types/node": "^20.11.19",
