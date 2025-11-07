@@ -1,23 +1,20 @@
 import 'dotenv/config';
+import OpenAI from 'openai';
 import { parseCliArgs } from './cliArgs.js';
 import { buildSystemPrompt, buildUserPrompt } from './prompts.js';
 import { writeBriefsToFile } from './outputWriter.js';
 import { createOpenAIClient } from './openaiClient.js';
 
-async function main() {
-  const cliArgs = parseCliArgs();
 
-  if (!process.env.OPENAI_API_KEY) {
-    console.error('Missing OPENAI_API_KEY. Set it in your environment or .env file.');
-    process.exit(1);
+async function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('Missing OPENAI_API_KEY. Set it in your environment or .env file.');
   }
+  return createOpenAIClient(apiKey);
+}
 
-  const systemPrompt = buildSystemPrompt();
-  const userPrompt = buildUserPrompt(cliArgs);
-
-  const client = createOpenAIClient(process.env.OPENAI_API_KEY);
-  const targetModel = 'gpt-4o-mini';
-
+async function getResponseFromOpenAI(client: OpenAI, userPrompt: string, systemPrompt: string, targetModel: string) {
   const responsePayload = {
     model: targetModel,
     temperature: 0.3,
@@ -32,21 +29,27 @@ async function main() {
   const rawJson = response.output_text;
 
   if (!rawJson) {
-    console.error('No content received from OpenAI response.');
-    process.exit(1);
+    throw new Error('No content received from OpenAI response.');
   }
 
-  let parsed;
-  try {
-    parsed = JSON.parse(rawJson);
-  } catch (err) {
-    console.error('Failed to parse JSON response:', err);
-    process.exit(1);
-  }
+  return JSON.parse(rawJson);
+}
 
-  const filePath = await writeBriefsToFile(parsed);
-
+async function writeBriefsToFilepath(briefs: unknown) {
+  const filePath = await writeBriefsToFile(briefs);
   console.log(`Briefs saved to ${filePath}`);
+  return filePath;
+}
+
+async function main() {
+  const cliArgs = parseCliArgs();
+  const systemPrompt = buildSystemPrompt();
+  const userPrompt = buildUserPrompt(cliArgs);
+  const targetModel = 'gpt-4o-mini';
+
+  const client = await getOpenAIClient();
+  const parsed = await getResponseFromOpenAI(client, userPrompt, systemPrompt, targetModel);
+  await writeBriefsToFilepath(parsed);
 }
 
 main().catch((err) => {
