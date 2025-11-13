@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --import ./register-ts-node.mjs src/chat.ts --level=junior --domain=EdTech --tech_focus=backend --stack=Node,TypeScript,Supabase --duration=\"2 weeks\" --count=3",
+    "dev": "node --import ./register-ts-node.mjs src/chat.ts --level=junior --domain=EdTech --tech_focus=backend --stack=Node,TypeScript,Supabase --duration=\"2 weeks\" --count=1",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/chat.js --level=junior --domain=FinTech --tech_focus=frontend --stack=React,TypeScript,TailwindCSS --duration=\"2 weeks\" --count=3"
+    "start": "node dist/chat.js --level=junior --domain=FinTech --tech_focus=frontend --stack=React,TypeScript,TailwindCSS --duration=\"2 weeks\" --count=1"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

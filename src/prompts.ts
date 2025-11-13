@@ -10,6 +10,7 @@ Each brief must:
 - Respect the given stack and tech focus (frontend, backend, or fullstack),
 - Have achievable and measurable goals within the given duration,
 - Follow the output schema precisely (valid JSON only).
+- Make sure to create the 3 first user stories with the highest priority.
 
 You combine pedagogical expertise with realistic business insight.
 Your briefs are concise, technically sound, and contextually relevant to the target industry.
@@ -37,7 +38,42 @@ The JSON schema is:
   ],
   "assessment_criteria": "Code clarity, UX design quality, and data visualization performance",
   "company_size": "Startup",
-  "complexity": "medium"
+  "complexity": "medium",
+  "user_stories": [
+    {
+      "title": "Filter transactions by category",
+      "description": "As a user, I want to filter my transactions by category so I can see where I spend the most money.",
+      "acceptance_criteria": [
+        "Given I am on the dashboard, when I open the filter panel, I can select one or more categories.",
+        "When a category is selected, only transactions matching that category appear within one second.",
+        "The filter selection persists when I navigate away and return to the dashboard within the same session."
+      ],
+      "priority": "high",
+      "complexity": "medium"
+    },
+    {
+      "title": "View monthly spending summary",
+      "description": "As a user, I want to see a monthly spending summary so I can track trends in my expenses.",
+      "acceptance_criteria": [
+        "Given I am on the dashboard, when the page loads, I see a bar chart summarizing each month's total spend.",
+        "Hovering over a bar reveals the total spend and the top two spending categories for that month.",
+        "If no transactions exist for a month, the chart displays a zero-value bar with appropriate messaging."
+      ],
+      "priority": "high",
+      "complexity": "medium"
+    },
+    {
+      "title": "Save preferred dashboard layout",
+      "description": "As a user, I want to save my preferred dashboard layout so I can quickly access the information I care about most.",
+      "acceptance_criteria": [
+        "Given I rearrange dashboard widgets, when I click 'Save layout', the new arrangement is stored for my account.",
+        "When I return to the dashboard, my saved layout appears by default.",
+        "There is an option to reset to the default layout, restoring the original widget positions."
+      ],
+      "priority": "medium",
+      "complexity": "medium"
+    }
+  ]
 }
 
 ⚙️ **Generation Rules:**
@@ -55,7 +91,7 @@ export function buildUserPrompt({
   tech_focus,
   stack,
   duration,
-  count = 3,
+  count = 1,
 }: CliArgs): string {
   return `Generate ${count} project briefs for :
 {
@@ -71,7 +107,7 @@ Authoring guidelines:
 2. Ensure goals are action-oriented, start with strong verbs, and stay within 12 words.
 3. Deliverables must be tangible outputs teams can hand over at the end of the engagement.
 4. Assessment criteria should cover success signals for UX, engineering quality, and business alignment.
-5. Do not copy or lightly edit the example; invent a new scenario within FinTech.
+5. Do not copy or lightly edit the example; invent a new scenario within ${domain}.
 
 Return ONLY the JSON object conforming to the schema.`;
 }
